@@ -21,6 +21,8 @@
 //! - [`crate::capture`] - the other Accessibility consumer; unrelated code path.
 
 mod ax;
+// The badge poller is switched off (see `controller::start`); only `create_window` is live.
+#[allow(dead_code)]
 pub(crate) mod badge;
 mod clipboard;
 mod controller;

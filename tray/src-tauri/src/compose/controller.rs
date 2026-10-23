@@ -93,7 +93,12 @@ pub fn start(app: tauri::AppHandle) {
     }
     let (tx, rx) = mpsc::channel::<()>();
     let _ = PRESS.set(tx.clone());
-    super::badge::start(app);
+    // The badge (the Meridian icon drawn beside every focused text box, in every app) is
+    // switched off: its poller is never started, so the hidden `compose-badge` window is
+    // never moved or shown. The writing key itself is unaffected. To bring it back,
+    // restore this call and drop the `allow(dead_code)`s on `badge` and `is_working`.
+    // super::badge::start(app);
+    let _ = app;
     if let Err(e) = std::thread::Builder::new()
         .name("compose-worker".into())
         .spawn(move || worker(rx))
@@ -184,6 +189,8 @@ fn user_name() -> Option<String> {
 static WORKING: AtomicBool = AtomicBool::new(false);
 
 /// Whether a press is in flight right now.
+// Only the badge poller reads this, and that poller is switched off (see `start`).
+#[allow(dead_code)]
 pub fn is_working() -> bool {
     WORKING.load(Ordering::SeqCst)
 }
