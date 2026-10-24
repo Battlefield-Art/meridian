@@ -277,6 +277,26 @@ export default function MeridianTimelineShell() {
     }
   }, [])
 
+  // What's New shows once per version, but only here: when the user opens the
+  // dashboard themselves. The tray no longer pushes the window on screen after
+  // an update. A deep link that already chose a modal (a notification's [View],
+  // say) wins; the unseen result is held until no modal is open, because "Open
+  // Dashboard" re-shows an existing window without remounting, so a mount-only
+  // check would drop it for that window's life. Closing the notes marks the
+  // version seen via closeWhatsNew.
+  const [whatsNewPending, setWhatsNewPending] = useState(false)
+  useEffect(() => {
+    invoke<boolean>('whats_new_unseen')
+      .then(unseen => { if (unseen) setWhatsNewPending(true) })
+      .catch(() => {})
+  }, [])
+  useEffect(() => {
+    if (whatsNewPending && activeModal === null) {
+      setWhatsNewPending(false)
+      setActiveModal('whats-new')
+    }
+  }, [whatsNewPending, activeModal])
+
   // Changing day resets the selected hour (its detail no longer applies).
   function shift(delta: number) {
     setSelectedHour(null)
@@ -364,9 +384,9 @@ export default function MeridianTimelineShell() {
     setActiveModal(null)
   }
 
-  // Marks the running app version "seen" so the once-per-version auto-open
-  // (poll::whats_new_auto_open) doesn't fire again — whether this close came
-  // from the auto-open or a manual nav-pill open, viewing it counts as seen.
+  // Marks the running app version "seen" so the dashboard-open check
+  // (`whats_new_unseen`) doesn't show it again — whether this close came from
+  // that check or a manual nav-pill open, viewing it counts as seen.
   function closeWhatsNew() {
     invoke('mark_whats_new_seen_cmd').catch(() => {})
     setActiveModal(null)

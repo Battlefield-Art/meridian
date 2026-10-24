@@ -28,10 +28,14 @@ mod capture_health;
 mod live;
 mod notifications;
 mod permissions;
+// Not called from the poll loop: dashboard auto-opens are switched off (see the tick body).
+#[allow(dead_code)]
 mod plan_auto_open;
 mod refresh;
 mod startup_health;
 mod watchdog;
+// Not called from the poll loop: dashboard auto-opens are switched off (see the tick body).
+#[allow(dead_code)]
 mod whats_new_auto_open;
 
 use crate::state::{AppState, HealthStatus, PauseSource};
@@ -150,15 +154,16 @@ pub async fn run_poll_loop(app: tauri::AppHandle, state: Arc<Mutex<AppState>>) {
         // feature is enabled; never overrides a user-initiated timed pause.
         if let Some(pool) = &pool {
             check_work_hours(&app, &state, pool).await;
-            // Daily "Plan your day" auto-open — at most once per local day
-            // (marker-file gated; a single file stat on the common path). If
-            // the pool isn't open yet this tick, it simply retries next tick.
-            plan_auto_open::maybe_auto_open_plan(&app, pool).await;
-            // "What's New" auto-open — at most once per app version. Defers
-            // itself (see its own module docs) whenever the dashboard window
-            // is already open — which also naturally avoids colliding with
-            // the Plan auto-open just above on the same tick.
-            whats_new_auto_open::maybe_auto_open_whats_new(&app).await;
+            // Both dashboard auto-opens are switched off: Meridian runs in the
+            // background and its window only ever appears when the user opens it.
+            // The daily "Plan your day" open had no hour gate, so it popped up at
+            // midnight on an awake Mac; the "What's New" open fired on the relaunch
+            // after an update, including a forced minimum-version install. Plan
+            // and What's New stay reachable from the dashboard itself. To bring
+            // either back, restore its call and drop the `allow(dead_code)` on
+            // its module above.
+            // plan_auto_open::maybe_auto_open_plan(&app, pool).await;
+            // whats_new_auto_open::maybe_auto_open_whats_new(&app).await;
         }
 
         // Drain the daemon's notification outbox every tick — this is the single

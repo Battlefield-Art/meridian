@@ -8,8 +8,11 @@
 //! - [`get_whats_new`] / [`mark_whats_new_seen_cmd`]: the `WhatsNewModal`
 //!   (`ui/components/timeline/WhatsNewModal.tsx`), opened via the toolbar nav
 //!   pill or a `/whats-new` deep link.
-//! - [`has_unseen_release_notes`] / [`mark_whats_new_seen`]: the poll loop's
-//!   once-per-version auto-open (`crate::poll`'s `whats_new_auto_open`).
+//! - [`whats_new_unseen`]: `MeridianTimelineShell` on mount, to show the notes
+//!   once per version when the user opens the dashboard themselves.
+//! - [`has_unseen_release_notes`] / [`mark_whats_new_seen`]: the above, plus the
+//!   poll loop's once-per-version auto-open (`crate::poll`'s
+//!   `whats_new_auto_open`), which is switched off.
 //!
 //! # Related
 //! - `tray/src-tauri/resources/whats-new.json` — the content; update it per
@@ -134,6 +137,26 @@ pub fn mark_whats_new_seen_cmd(app: tauri::AppHandle) {
     if let Err(e) = mark_whats_new_seen(&home, &current) {
         tracing::warn!(error = %e, "whats-new: failed to write last_seen_version");
     }
+}
+
+/// `true` when the dashboard should show What's New as it opens: the running
+/// version's notes are unseen, the install is onboarded, and no walkthrough is
+/// owed. This replaces the poll loop's auto-open, which pushed the dashboard on
+/// screen after an update; now the notes wait until the user opens it
+/// themselves. Seen is still written by [`mark_whats_new_seen_cmd`] when the
+/// modal closes, so it shows once per version.
+#[tauri::command]
+#[tracing::instrument(skip(app))]
+pub fn whats_new_unseen(app: tauri::AppHandle) -> bool {
+    let Some(home) = meridian_core::paths::home_dir() else {
+        return false;
+    };
+    let current = app.package_info().version.to_string();
+    let show = has_unseen_release_notes(&home, &current)
+        && home.join(".meridian").join("onboarded").exists()
+        && !crate::commands::walkthrough::tour_owed(&home);
+    tracing::info!(show, version = %current, "whats-new: dashboard-open check");
+    show
 }
 
 #[cfg(test)]
