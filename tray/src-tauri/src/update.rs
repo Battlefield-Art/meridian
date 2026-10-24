@@ -584,18 +584,18 @@ pub fn enforce_minimum_version(app: &AppHandle) {
                 "update: running version is below the minimum supported - forcing install"
             );
             if !notified {
-                // Warm and factual. The user did not ask for this install and
-                // is about to have the app restart under them, so the toast
-                // says what is happening and that it will restart — but it does
-                // not scold them for the version they were on. Matches the tone
-                // of the other update toasts ("You're on the latest version.").
-                notify_update(
-                    &app,
-                    "mandatory",
-                    "Updating Meridian",
-                    &format!("Installing v{v} - Meridian will restart in a moment."),
-                )
-                .await;
+                // The forced-install toast is switched off: a mandatory update
+                // installs and relaunches silently in the background, and the
+                // user sees What's New the next time they open the dashboard
+                // (`commands::whats_new_unseen`). `notified` still flips so the
+                // episode bookkeeping below is unchanged if this is restored.
+                // notify_update(
+                //     &app,
+                //     "mandatory",
+                //     "Updating Meridian",
+                //     &format!("Installing v{v} - Meridian will restart in a moment."),
+                // )
+                // .await;
                 notified = true;
             }
             if let Err(e) = download_and_apply(&app).await {

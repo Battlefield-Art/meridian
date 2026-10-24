@@ -1,6 +1,20 @@
 {
   "releases": [
     {
+      "version": "1.96.2",
+      "date": "2026-10-24",
+      "items": [
+        {
+          "title": "Stays quietly in the background",
+          "body": "Meridian no longer opens its window on its own - not to plan your day, and not after an update."
+        },
+        {
+          "title": "No more icon beside text boxes",
+          "body": "The Meridian icon next to text fields is gone. The ⌥ writing key works just as before."
+        }
+      ]
+    },
+    {
       "version": "1.95.0",
       "date": "2026-10-06",
       "items": [
