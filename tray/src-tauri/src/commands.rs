@@ -42,7 +42,8 @@
 pub mod account;
 pub mod app_icons;
 pub mod cli_exec;
-pub mod compose_badge;
+// The writing key's icon commands; switched off with the writing key (see `lib.rs`).
+// pub mod compose_badge;
 pub mod custom_llm;
 pub mod daemon;
 pub mod daemon_control;
