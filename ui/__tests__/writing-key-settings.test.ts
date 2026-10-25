@@ -33,9 +33,9 @@ describe('writing key settings', () => {
     }
   })
 
-  it('keeps the master switch in Capture & Privacy', () => {
-    const section = read('ui/components/timeline/settings/CaptureSection.tsx')
-    expect(section).toContain('<WritingKeyCard')
+  // The writing key is switched off in the tray and its card is hidden from Capture & Privacy;
+  // the card itself is kept so it can be restored with the feature.
+  it('keeps the master switch in the writing key card', () => {
     const card = read('ui/components/timeline/settings/WritingKeyCard.tsx')
     expect(card).toContain('settings.compose_enabled')
     expect(card).toContain("compose_enabled: v")

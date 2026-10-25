@@ -28,7 +28,10 @@ mod capture;
 mod capture_ignore;
 mod commands;
 // Compose: the key that writes into any text box. macOS only (Accessibility + event tap).
+// Switched off: `compose::start` is no longer called (see the setup hook), so its code is
+// kept but unreached.
 #[cfg(target_os = "macos")]
+#[allow(dead_code)]
 mod compose;
 mod counter_ping;
 mod crash;
@@ -1039,13 +1042,13 @@ pub fn run() {
             // object_setClass between them is safe (the same technique used by
             // tauri-nspanel). The Tauri IPC bridge (WKWebView + __TAURI__) is
             // unaffected — it lives inside the view, not the window class.
-            // The writing key's icon window is built here (macOS only) rather than declared in
-            // tauri.conf.json, which Windows shares.
-            #[cfg(target_os = "macos")]
-            compose::badge::create_window(app.handle());
+            // The writing key's icon window used to be built here. The writing key is switched
+            // off (see the `compose::start` call below), so the window is no longer created.
+            // #[cfg(target_os = "macos")]
+            // compose::badge::create_window(app.handle());
 
             #[cfg(target_os = "macos")]
-            for label in ["main", "tray-tooltip", "compose-badge"] {
+            for label in ["main", "tray-tooltip"] {
                 if let Some(win) = app.get_webview_window(label) {
                     init_as_nspanel(&win);
                     make_visible_over_fullscreen(&win);
@@ -1167,10 +1170,12 @@ pub fn run() {
                 None => restart_capture(app.handle(), &app_state, "setup panic fallback"),
             }
 
-            // Compose: the key that writes into any text box. On by default; its supervisor
-            // removes the event tap while `compose_enabled` is false in settings.json.
-            #[cfg(target_os = "macos")]
-            compose::start(app.handle().clone());
+            // Compose: the key that writes into any text box. Switched off: the Right Option
+            // key no longer reads or writes text fields, whatever `compose_enabled` says. To
+            // bring it back, restore this call, drop the `allow(dead_code)` on `mod compose`,
+            // and restore the Settings card in `CaptureSection.tsx`.
+            // #[cfg(target_os = "macos")]
+            // compose::start(app.handle().clone());
 
             // Auto-open the setup wizard on first launch (no ~/.meridian/onboarded).
             // The 800 ms delay lets the tray menu settle before the window appears.
@@ -1255,8 +1260,9 @@ pub fn run() {
         // `commands.rs`, AND list it here — a missing entry fails the frontend
         // `invoke` at runtime ("command not found"), not at compile time.
         .invoke_handler(tauri::generate_handler![
-            commands::compose_badge::compose_badge_click,
-            commands::compose_badge::compose_badge_log,
+            // The writing key's icon commands are switched off with the writing key.
+            // commands::compose_badge::compose_badge_click,
+            // commands::compose_badge::compose_badge_log,
             commands::repair::preview_repair,
             commands::repair::request_repair,
             // tray popover + daemon lifecycle

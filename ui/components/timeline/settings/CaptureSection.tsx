@@ -35,7 +35,8 @@ import { TextInput } from '@/components/ui/TextInput'
 import type { RuntimeSettings } from '@/lib/settings'
 import { SectionCard, SectionHeader, FieldRow, SaveButton, type SaveStatus } from './fields'
 import { CaptureIgnoreCards } from './CaptureIgnoreCards'
-import { WritingKeyCard } from './WritingKeyCard'
+// The writing key is switched off in the tray (`lib.rs` no longer starts it), so its card is hidden.
+// import { WritingKeyCard } from './WritingKeyCard'
 
 export function CaptureSection({ settings, patch, save }: {
   settings: RuntimeSettings
@@ -138,7 +139,7 @@ export function CaptureSection({ settings, patch, save }: {
 
       <CaptureIgnoreCards settings={settings} patch={patch} save={save} />
 
-      <WritingKeyCard settings={settings} patch={patch} save={save} />
+      {/* <WritingKeyCard settings={settings} patch={patch} save={save} /> */}
 
       <SectionCard>
         <SectionHeader>Error reporting</SectionHeader>

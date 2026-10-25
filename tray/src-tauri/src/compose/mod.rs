@@ -14,7 +14,8 @@
 //! ```
 //!
 //! # Who calls this
-//! `lib.rs`'s setup hook calls [`start`] once, on macOS only.
+//! Nothing, at present: the writing key is switched off. `lib.rs`'s setup hook used to call
+//! `controller::start` once, on macOS only.
 //!
 //! # Related
 //! - [`meridian::compose`] - classify, prompt, generate, parse.
@@ -43,4 +44,6 @@ mod typing;
 mod walk;
 mod writer;
 
-pub(crate) use controller::{press, start};
+// The writing key is switched off: nothing calls `start` (see `lib.rs`) or `press` (the icon
+// commands are switched off too), so these re-exports are commented out with them.
+// pub(crate) use controller::{press, start};
